@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .loading-wrap {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            padding-top: 25%;
+            z-index: 999;
+        }
+        .loading-wrap .loading-content {
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-12" style="padding: 0">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="/index.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-music-note-list" viewBox="0 0 16 16">
+                        <path d="M12 13c0 1.105-1.12 2-2.5 2S7 14.105 7 13s1.12-2 2.5-2 2.5.895 2.5 2z"/>
+                        <path fill-rule="evenodd" d="M12 3v10h-1V3h1z"/>
+                        <path d="M11 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 16 2.22V4l-5 1V2.82z"/>
+                        <path fill-rule="evenodd" d="M0 11.5a.5.5 0 0 1 .5-.5H4a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 .5 7H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 .5 3H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    NavMusic
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <form class="form-inline my-2 my-lg-0" id="search-form" method="get" action="/search.html">
+                        <input name="keyword" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <div class="loading-wrap" id="loading">
+        <div class="loading-content">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div class="list-group" id="list-wrapper">
+
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.min.js"></script>-->
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    let keyword = ''
+    let params = new URLSearchParams(location.search)
+    let $loading = $('#loading')
+
+    params.forEach((v, k) => {
+        if (k === 'keyword') {
+            keyword = v
+        }
+    })
+
+    function openLoading() {
+        $loading.show()
+        $loading.find('div').show()
+    }
+    function closeLoading() {
+        $loading.hide()
+        $loading.find('div').hide()
+    }
+
+    function parseStoreId(name) {
+        let lidx = name.indexOf("[")
+        let ridx = name.lastIndexOf("]")
+        if (lidx === -1 || ridx === -1) {
+            return name
+        }
+        return name.substring(0, lidx) + name.substring(ridx + 1)
+    }
+    function chooseItem(target) {
+        openLoading()
+        let el = $(target)
+        let ref = el.attr("data-ref")
+        let id = el.attr("data-id")
+
+        $.ajax({
+            url: "api/music/getPlayUrl",
+            data: {
+                "thread": ref,
+                "name": id
+            },
+            success(data) {
+                window.location = "player.html?id=" + data
+            }
+        })
+    }
+
+    if (keyword !== '') {
+        openLoading()
+        $.ajax({
+            url: "api/music/search",
+            data: {
+                keyword
+            },
+            success(data) {
+                let as = []
+                for (let i = 0; i < data.length; i++) {
+                    let it = data[i]
+                    let ref = $(it).attr('href')
+                    let text = $(it).text()
+
+                    let aEl = $('<div>')
+                    aEl.attr("data-ref", ref)
+                    aEl.attr("data-id", parseStoreId(text))
+                    // aEl.attr("href", "player.html?ref=" + ref + "&name=" + encodeURIComponent(parseStoreId(text)))
+                    aEl.addClass("list-group-item").addClass("list-group-item-action")
+                    aEl.text(text)
+                    aEl.click(e => {
+                        chooseItem(e.target)
+                    })
+
+                    as.push(aEl)
+                }
+                $('#list-wrapper').html(as)
+                closeLoading()
+            }
+        })
+    }
+</script>
+</body>
+</html>
