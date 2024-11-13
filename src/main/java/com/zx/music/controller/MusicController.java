@@ -3,6 +3,7 @@ package com.zx.music.controller;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.zx.music.bean.MusicItem;
 import com.zx.music.manager.MusicManager;
@@ -42,6 +43,12 @@ public class MusicController {
     @GetMapping("/list")
     public List<MusicItem> list() {
         return musicManager.getMusicItems();
+    }
+
+    @GetMapping("/bbs_token")
+    public String bbsToken(String bbsToken) {
+        musicManager.setBbsToken(bbsToken);
+        return bbsToken;
     }
 
     @GetMapping("/play")
@@ -97,7 +104,10 @@ public class MusicController {
             }
             try {
                 String url = "https://www.hifini.com/" + thread;
-                String listContent = HttpUtil.get(url);
+                HttpRequest request = HttpRequest.get(url)
+                        .header("Cookie", "bbs_token=" + musicManager.getBbsToken());
+                String listContent = request.execute().body();
+
                 List<String> titles = ReUtil.findAll("music: \\[(.*?)\\]", listContent, 1);
                 String playUrl;
                 try {

@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.zx.music.bean.MusicItem;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -18,6 +19,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MusicManager {
 
     private final CopyOnWriteArrayList<MusicItem> musicItems = new CopyOnWriteArrayList<>();
+
+    @Setter
+    private String bbsToken = "GTX1ABMONOcFUu_2B2wFVr15JHc23Caub8VdR3pPjFkMCe_2Bb9HwLmPVB9V99nkczUYCExsAEY9GczcJt2LL195QdUzAFZ1Eq3Z";
 
     private synchronized void load() {
         File root = new File("store");
