@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link href="/lib/bootstrap_4.5.3.css" rel="stylesheet">
+    <style>
+        body {
+            overflow: hidden;
+        }
+        .play-control-btn {
+            cursor: pointer;
+            margin: 0 10px;
+            /*transition: all .2s;*/
+        }
+        .list-group-item.active .play-music-icon {
+            display: inline-block;
+        }
+        .play-music-icon {
+            width: 16px;
+            height: 16px;
+            position: relative;
+            left: -5px;
+            top: 2px;
+            display: none;
+            animation: 3s linear infinite spinner-border;
+        }
+        .play-music-icon svg {
+            position: absolute;
+            top: 0;
+        }
+        .play-list-container {
+            overflow: scroll;
+        }
+        .loading-wrap {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            padding-top: 25%;
+            z-index: 999;
+        }
+        .loading-wrap .loading-content {
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-12" style="padding: 0">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="/index.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-music-note-list" viewBox="0 0 16 16">
+                        <path d="M12 13c0 1.105-1.12 2-2.5 2S7 14.105 7 13s1.12-2 2.5-2 2.5.895 2.5 2z"/>
+                        <path fill-rule="evenodd" d="M12 3v10h-1V3h1z"/>
+                        <path d="M11 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 16 2.22V4l-5 1V2.82z"/>
+                        <path fill-rule="evenodd" d="M0 11.5a.5.5 0 0 1 .5-.5H4a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 .5 7H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 .5 3H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    NavMusic
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <form class="form-inline my-2 my-lg-0" id="search-form" method="get" action="/search.html">
+                        <input name="keyword" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="loading-wrap" id="loading">
+                <div class="loading-content">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <h4 id="musicNameText" style="margin: 20px 0"></h4>
+            <div id="waveform"></div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+
+            <!-- 播放控制按钮 -->
+            <div class="row" style="margin: 20px 0">
+                <div class="col-12 d-flex justify-content-center align-items-center">
+                    <div class="play-control-btn play-arrows-left-btn" id="playLeftBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-chevron-double-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                            <path fill-rule="evenodd" d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                    </div>
+
+                    <div class="play-control-btn play-playpause-btn" id="playBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-play-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/>
+                        </svg>
+                    </div>
+                    <div class="play-control-btn play-playpause-btn" id="pauseBtn" style="display: none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-pause-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M5 6.25a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0v-3.5zm3.5 0a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0v-3.5z"/>
+                        </svg>
+                    </div>
+
+                    <div class="play-control-btn play-arrows-right-btn" id="playRightBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-chevron-double-right" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"/>
+                            <path fill-rule="evenodd" d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center" style="padding: 10px 0;">
+                        <span>
+                            下一曲：<span id="nextMusicText"></span>
+                        </span>
+                        <button type="button" class="btn btn-light" data-toggle="collapse" data-target="#collapseExampleWrap" aria-expanded="false" aria-controls="collapseExampleWrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="collapse" id="collapseExampleWrap">
+                <ul class="list-group play-list-container" id="playListUl">
+<!--                    <li class="list-group-item active">-->
+<!--                        <div class="play-music-icon">-->
+<!--                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-music-note" viewBox="0 0 16 16">-->
+<!--                                <path d="M9 13c0 1.105-1.12 2-2.5 2S4 14.105 4 13s1.12-2 2.5-2 2.5.895 2.5 2z"/>-->
+<!--                                <path fill-rule="evenodd" d="M9 3v10H8V3h1z"/>-->
+<!--                                <path d="M8 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 13 2.22V4L8 5V2.82z"/>-->
+<!--                            </svg>-->
+<!--                        </div>-->
+<!--                        An active item-->
+<!--                    </li>-->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.min.js"></script>-->
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@7"></script>
+<script>
+    window.CusIdx = -1
+    window.RequestPlayId = ''
+    window.Loading = false
+    let params = new URLSearchParams(location.search)
+    let $playBtn = $('#playBtn')
+    let $pauseBtn = $('#pauseBtn')
+    let $loading = $('#loading')
+    let $playListUl = $('#playListUl')
+    let $playLeftBtn = $('#playLeftBtn')
+    let $playRightBtn = $('#playRightBtn')
+    let $nextMusicText = $('#nextMusicText')
+    let $musicNameText = $('#musicNameText')
+
+    params.forEach((v, k) => {
+        if (k === 'id') {
+            window.RequestPlayId = v
+        }
+    })
+
+    let playListHeight = $(window).height() - 415;
+    $playListUl.height(playListHeight);
+
+    function wavesurferPlay(url) {
+        if (!window.wavesurfer) {
+            window.wavesurfer = WaveSurfer.create({
+                container: '#waveform',
+                waveColor: '#4F4A85',
+                progressColor: '#383351',
+            })
+
+            window.wavesurfer.on("finish", () => {
+                play((window.CusIdx + 1) % window.MusicList.length)
+            })
+        }
+        return window.wavesurfer.load(url)
+    }
+
+    function openLoading() {
+        if (window.Loading === true) {
+            return
+        }
+        window.Loading = true
+        $loading.show()
+        $loading.find('div').show()
+    }
+    function closeLoading() {
+        if (window.Loading === false) {
+            return
+        }
+        window.Loading = false
+        $loading.hide()
+        $loading.find('div').hide()
+    }
+
+    function doPlay(item) {
+        $musicNameText.text(item.name)
+
+        let url = "api/music/resource/" + item.id
+        return wavesurferPlay(url)
+    }
+
+    function loadMusicList() {
+        $.ajax({
+            url: "api/music/list",
+            success(data) {
+                window.MusicList = data
+
+                if (window.RequestPlayId !== '') {
+                    play(findIdx(window.RequestPlayId))
+                } else {
+                    play(0)
+                }
+                renderList()
+            }
+        })
+    }
+    function findIdx(reqId) {
+        for (let i = 0; i < window.MusicList.length; i++) {
+            let it = window.MusicList[i]
+            if (it.id === reqId) {
+                return i
+            }
+        }
+        return -1
+    }
+    function play(idx) {
+        let before = window.CusIdx
+        window.CusIdx = idx
+
+        openLoading()
+        return doPlay(window.MusicList[window.CusIdx])
+            .finally(() => {
+                let nextId = (window.CusIdx + 1) % window.MusicList.length
+                let nextName = window.MusicList[nextId].name
+                $nextMusicText.text(nextName)
+                actionPlay()
+
+                if (before >= 0) {
+                    let lis = $playListUl.find('li')
+                    lis.eq(before).removeClass('active')
+                    lis.eq(idx).addClass('active')
+                }
+                closeLoading()
+            })
+    }
+    function actionPlay() {
+        window.wavesurfer.play().then(() => {
+            $playBtn.hide()
+            $pauseBtn.show()
+        })
+    }
+    function actionPause() {
+        window.wavesurfer.pause()
+        $playBtn.show()
+        $pauseBtn.hide()
+    }
+    function renderList() {
+        let lis = []
+        for (let i = 0; i < window.MusicList.length; i++) {
+            let it = window.MusicList[i]
+
+            let $li = $('<li class="list-group-item">')
+            $li.html(`
+                <div class="play-music-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-music-note" viewBox="0 0 16 16">
+                        <path d="M9 13c0 1.105-1.12 2-2.5 2S4 14.105 4 13s1.12-2 2.5-2 2.5.895 2.5 2z"/>
+                        <path fill-rule="evenodd" d="M9 3v10H8V3h1z"/>
+                        <path d="M8 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 13 2.22V4L8 5V2.82z"/>
+                    </svg>
+                </div>
+                ${it.name}
+            `)
+            if (i === window.CusIdx) {
+                $li.addClass("active")
+            }
+            $li.attr("data-idx", i)
+            $li.click(e => {
+                let idx = parseInt($(e.target).attr("data-idx"))
+                play(idx)
+            })
+            lis.push($li)
+        }
+        $playListUl.html(lis)
+    }
+
+    openLoading()
+    loadMusicList()
+
+    $playBtn.click(() => {
+        actionPlay()
+    })
+    $pauseBtn.click(() => {
+        actionPause()
+    })
+    $playLeftBtn.click(() => {
+        play(window.CusIdx - 1 < 0 ? window.MusicList.length - 1 : window.CusIdx - 1)
+    })
+    $playRightBtn.click(() => {
+        play((window.CusIdx + 1) % window.MusicList.length)
+    })
+</script>
+</body>
+</html>

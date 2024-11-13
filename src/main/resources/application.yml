@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: music
+
+server:
+  port: 8080
+
