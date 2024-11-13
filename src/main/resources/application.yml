@@ -1,6 +1,12 @@
 spring:
   application:
     name: music
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          cache-public: true
+          max-age: 31536000
 
 server:
   port: 8080
