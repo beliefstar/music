@@ -150,6 +150,9 @@ public class Comm {
 //        String s = "https://www.hifini.com/" + parsePlayUrl("get_music.php?key=wwwHiFiNicomHyGdaqX6xxHiFiNixxS3DdjAZKGbFgt2c9mouzAECUCuvLREzdL8GG88qUPRxcUTa50ylNt0&p='+ generateParam('Ypn4ARo65f0TNUO6IseHoTLbQ6YFnfPV7DQbMfx7P1fey2lJHAoyKrMNDLwobnvyu0uocNgQN8IRL6JGxV4klQ')");
         String s = "https://www.hifini.com/get_music.php?key=r8UmKewwwHiFiNicom55Q0THpHBHW6YSrXfiZ1FM3pooGSxIuexxHiFiNixxpOk0VqCwwwwHiFiNicombE4QwGVWUw&p=O5ZAAEJUFYASEGJ6BYNAAHKFIBHH2HRRDYDAAJIGEMRTAFQ5MZ5AY5RBDESXUH3VDEVQWGYXEVNXCUD3DYHQ6PIKCQWBWPIVEQSAKW3NPYSQENI2AMQAQIJ6EEWCSXCENZLS2IQUBMPDCHQGAASQMI23KRLFQOQZJ4YBCDQABAAC2BQVJJ5VGTJOCIZBEBL6";
 
+        System.out.println(Comm.buildStoreId("林俊杰《光阴副本》"));
+
+        if (true) return;
         System.out.println(s);
 
         HttpResponse response = HttpRequest.get(s).timeout(60000)

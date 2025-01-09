@@ -7,6 +7,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import com.zx.music.bean.LoginBean;
+import com.zx.music.common.JwtHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,13 +31,15 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class SignatureFilter extends OncePerRequestFilter {
 
-    @Value("${HW_IOT_FORWARD_TOKEN:fbf3a6a74df34b35a145d9bf341483cc}")
-    public String token;
-
     @Autowired
     private IpBlackHandler ipBlackHandler;
 
+    @Autowired
+    private JwtHandler jwtHandler;
+
     public static final String UNLOCK_SUFFIX = "/api/ip/unlock";
+    public static final String API_PREFIX = "/api/";
+    public static final String LOGIN_PATH = "/api/auth/login";
 
     public static final String BASIC_PREFIX = "Basic ";
 
@@ -57,12 +61,15 @@ public class SignatureFilter extends OncePerRequestFilter {
         }
         if (code == UNAUTHORIZED) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.addHeader("WWW-Authenticate", "Basic realm=\"nav music\"");
         }
     }
 
     private int internalFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         String uri = request.getRequestURI();
+
+        if (!uri.startsWith(API_PREFIX) || uri.equalsIgnoreCase(LOGIN_PATH)) {
+            return SUCCESS;
+        }
 
         String ip = JakartaServletUtil.getClientIP(request);
         boolean isUnlockReq = uri.endsWith(UNLOCK_SUFFIX);
@@ -81,7 +88,7 @@ public class SignatureFilter extends OncePerRequestFilter {
         String timestamp = getParam(request, "timestamp");
         String nonce = getParam(request, "nonce");
         String signature = getParam(request, "signature");
-        if (checkTimestamp(timestamp) && checkSignature(nonce, timestamp, signature, token)) {
+        if (checkTimestamp(timestamp) && checkSignature(nonce, timestamp, signature, jwtHandler.getJwtToken())) {
             if (isUnlockReq) {
                 ipBlackHandler.remove(ip);
             }
@@ -94,41 +101,51 @@ public class SignatureFilter extends OncePerRequestFilter {
     }
 
     private int tryAuth(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
-        String authorization = request.getHeader("Authorization");
+        String authorization = getParam(request, "Nav-Token");
         if (StrUtil.isBlank(authorization)) {
             return NONE;
         }
 
-        if (!authorization.startsWith(BASIC_PREFIX)) {
-            return UNAUTHORIZED;
+        try {
+            LoginBean loginBean = jwtHandler.parseToken(authorization);
+            if (loginBean != null) {
+                return SUCCESS;
+            }
+        } catch (Exception ignore) {
         }
-        authorization = authorization.substring(BASIC_PREFIX.length());
+        return UNAUTHORIZED;
 
-        if (StrUtil.isBlank(authorization)) {
-            return UNAUTHORIZED;
-        }
 
-        authorization = Base64.decodeStr(authorization);
-
-        List<String> split = StrUtil.split(authorization, ":", true, true);
-        if (split.size() != 2) {
-            return UNAUTHORIZED;
-        }
-        String username = split.get(0);
-        String password = split.get(1);
-
-        if (StrUtil.isBlank(username) || StrUtil.isBlank(password)) {
-            return UNAUTHORIZED;
-        }
-
-        if (!password.contains(username)) {
-            return UNAUTHORIZED;
-        }
-        password = password.replace(username, "");
-        if (!Objects.equals(password, "1115")) {
-            return UNAUTHORIZED;
-        }
-        return SUCCESS;
+//        if (!authorization.startsWith(BASIC_PREFIX)) {
+//            return UNAUTHORIZED;
+//        }
+//        authorization = authorization.substring(BASIC_PREFIX.length());
+//
+//        if (StrUtil.isBlank(authorization)) {
+//            return UNAUTHORIZED;
+//        }
+//
+//        authorization = Base64.decodeStr(authorization);
+//
+//        List<String> split = StrUtil.split(authorization, ":", true, true);
+//        if (split.size() != 2) {
+//            return UNAUTHORIZED;
+//        }
+//        String username = split.get(0);
+//        String password = split.get(1);
+//
+//        if (StrUtil.isBlank(username) || StrUtil.isBlank(password)) {
+//            return UNAUTHORIZED;
+//        }
+//
+//        if (!password.contains(username)) {
+//            return UNAUTHORIZED;
+//        }
+//        password = password.replace(username, "");
+//        if (!Objects.equals(password, "1115")) {
+//            return UNAUTHORIZED;
+//        }
+//        return SUCCESS;
     }
 
     private boolean checkTimestamp(String timestamp) {
@@ -168,31 +185,5 @@ public class SignatureFilter extends OncePerRequestFilter {
             value = request.getParameter(name);
         }
         return value;
-    }
-
-    public static void main(String[] args) {
-
-        String s = "bmFtZTpwYXNzd29yZA==";
-        System.out.println(Base64.decodeStr(s));
-
-        if (true) return;
-
-        String timestamp = Long.toString(System.currentTimeMillis());
-        String nonce = UUID.randomUUID().toString();
-        String token = "fbf3a6a74df34b35a145d9bf341483cc";
-        String signature = buildSignature(nonce, timestamp, token);
-
-        System.out.println(timestamp);
-        System.out.println(nonce);
-        System.out.println(signature);
-
-        HttpResponse response = HttpRequest.post("http://154.12.55.187:8080/api/ip/unlock")
-                .header("timestamp", timestamp)
-                .header("nonce", nonce)
-                .header("signature", signature).execute();
-        System.out.println(response.getStatus());
-        System.out.println(response.body());
-        response.close();
-
     }
 }

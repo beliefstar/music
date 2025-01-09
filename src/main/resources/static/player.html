@@ -169,6 +169,7 @@
 <!--<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.min.js"></script>-->
 <script src="/lib/bootstrap.bundle.min.js"></script>
 <script src="/lib/wavesurfer.min.js"></script>
+<script src="/cus/session.js"></script>
 <script>
     window.CusIdx = -1
     window.RequestPlayId = ''
@@ -227,7 +228,7 @@
     function doPlay(item) {
         $musicNameText.text(item.name)
 
-        let url = "api/music/resource/" + item.id
+        let url = "api/music/resource/" + item.id + "?Nav-Token=" + NavToken
         return wavesurferPlay(url)
     }
 
