@@ -14,6 +14,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.zx.music.bean.SearchItem;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -82,7 +86,53 @@ public class Comm {
         return new File("store/" + id);
     }
 
+    public static List<Element> search_raw(String keyword, int page) {
+        String host = "https://www.hifini.com";
+        String range = "1";
+        keyword = URLUtil.encode(keyword).replace("%", "_");
+        String url = StrUtil.format("{}/search-{}-{}-{}.htm", host, keyword, range, page);
+
+        String listContent = HttpUtil.get(url);
+        Document doc = Jsoup.parse(listContent);
+        Elements as = doc.body().getElementsByTag("a");
+
+        List<Element> list = new ArrayList<>();
+        for (Element a : as) {
+            String ref = a.attr("href");
+            if (ref.startsWith("thread-")) {
+                list.add(a);
+            }
+        }
+        return list;
+    }
     public static List<SearchItem> search(String keyword, int page) {
+        List<Element> as = search_raw(keyword, page);
+
+        List<SearchItem> list = new ArrayList<>();
+        for (Element a : as) {
+            String ref = a.attr("href");
+            if (ref.startsWith("thread-")) {
+                String name = parseName(a.text());
+                if (StrUtil.isBlank(ref) || StrUtil.isBlank(name)) {
+                    System.out.println(a);
+                    continue;
+                }
+                String id = Comm.buildStoreId(name);
+                if (exists(id)) {
+                    continue;
+                }
+                SearchItem si = new SearchItem();
+                si.setId(id);
+                si.setName(name + MUSIC_NAME_SUFFIX);
+                si.setThread(ref);
+                si.setCache(false);
+                list.add(si);
+            }
+        }
+        return list;
+    }
+
+    public static List<SearchItem> _search(String keyword, int page) {
         String host = "https://www.hifini.com";
         String range = "1";
         keyword = URLUtil.encode(keyword).replace("%", "_");
@@ -104,6 +154,14 @@ public class Comm {
     }
 
 
+    private static String parseName(String name) {
+        int lidx = name.indexOf("[");
+        int ridx = name.lastIndexOf("]");
+        if (lidx == -1 || ridx == -1) {
+            return name;
+        }
+        return name.substring(0, lidx) + name.substring(ridx + 1);
+    }
 
     public static SearchItem parseSearchItem(String it) {
         String ref = extractRef(it);
@@ -125,7 +183,7 @@ public class Comm {
     }
 
     private static String extractRef(String s) {
-        List<String> titles = ReUtil.findAll("<a href=\"(thread-\\w+.htm)\">.*?</a>", s, 1);
+        List<String> titles = ReUtil.findAll("<a href=\"(thread-\\w+.htm)\".*?</a>", s, 1);
         for (String title : titles) {
             title = title.replace("<em>", "");
             title = title.replace("</em>", "");
@@ -145,22 +203,8 @@ public class Comm {
         return "";
     }
 
+
     public static void main(String[] args) throws FileNotFoundException {
-//        String s = "https://m.hifini.com/music/苏打绿 - 我好想你.m4a";
-//        String s = "https://www.hifini.com/" + parsePlayUrl("get_music.php?key=wwwHiFiNicomHyGdaqX6xxHiFiNixxS3DdjAZKGbFgt2c9mouzAECUCuvLREzdL8GG88qUPRxcUTa50ylNt0&p='+ generateParam('Ypn4ARo65f0TNUO6IseHoTLbQ6YFnfPV7DQbMfx7P1fey2lJHAoyKrMNDLwobnvyu0uocNgQN8IRL6JGxV4klQ')");
-        String s = "https://www.hifini.com/get_music.php?key=r8UmKewwwHiFiNicom55Q0THpHBHW6YSrXfiZ1FM3pooGSxIuexxHiFiNixxpOk0VqCwwwwHiFiNicombE4QwGVWUw&p=O5ZAAEJUFYASEGJ6BYNAAHKFIBHH2HRRDYDAAJIGEMRTAFQ5MZ5AY5RBDESXUH3VDEVQWGYXEVNXCUD3DYHQ6PIKCQWBWPIVEQSAKW3NPYSQENI2AMQAQIJ6EEWCSXCENZLS2IQUBMPDCHQGAASQMI23KRLFQOQZJ4YBCDQABAAC2BQVJJ5VGTJOCIZBEBL6";
 
-        System.out.println(Comm.buildStoreId("林俊杰《光阴副本》"));
-
-        if (true) return;
-        System.out.println(s);
-
-        HttpResponse response = HttpRequest.get(s).timeout(60000)
-                .header("Referer", "https://www.hifini.com/")
-                .setFollowRedirects(true)
-                .execute();
-        FileOutputStream out = new FileOutputStream("/Users/yuanqinghuihong/Desktop/work/debug/test3.mp3");
-        IoUtil.copy(response.bodyStream(), out);
-        IoUtil.close(out);
     }
 }

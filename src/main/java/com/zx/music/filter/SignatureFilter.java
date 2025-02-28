@@ -71,81 +71,45 @@ public class SignatureFilter extends OncePerRequestFilter {
             return SUCCESS;
         }
 
-        String ip = JakartaServletUtil.getClientIP(request);
-        boolean isUnlockReq = uri.endsWith(UNLOCK_SUFFIX);
-        if (ipBlackHandler.contains(ip) && !isUnlockReq) {
-            return FORBIDDEN;
-        }
+//        String ip = JakartaServletUtil.getClientIP(request);
+//        boolean isUnlockReq = uri.endsWith(UNLOCK_SUFFIX);
+//        if (ipBlackHandler.contains(ip) && !isUnlockReq) {
+//            return FORBIDDEN;
+//        }
 
-        int code = tryAuth(request, response, filterChain);
-        if (code >= 0) {
-            if (code == SUCCESS) {
-                return SUCCESS;
+        return tryAuth(request, response, filterChain);
+//        if (code == SUCCESS) {
+//            if (isUnlockReq) {
+//                ipBlackHandler.remove(ip);
+//            }
+//            return SUCCESS;
+//        }
+//        if (uri.startsWith("/api")) {
+//            ipBlackHandler.add(ip);
+//        }
+//        return code;
+    }
+
+    private int tryAuth(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
+        String authorization = getParam(request, "Nav-Token");
+        if (StrUtil.isNotBlank(authorization)) {
+            try {
+                LoginBean loginBean = jwtHandler.parseToken(authorization);
+                if (loginBean != null) {
+                    return SUCCESS;
+                }
+            } catch (Exception ignore) {
             }
-            return FORBIDDEN;
+            return UNAUTHORIZED;
         }
 
         String timestamp = getParam(request, "timestamp");
         String nonce = getParam(request, "nonce");
         String signature = getParam(request, "signature");
         if (checkTimestamp(timestamp) && checkSignature(nonce, timestamp, signature, jwtHandler.getJwtToken())) {
-            if (isUnlockReq) {
-                ipBlackHandler.remove(ip);
-            }
             return SUCCESS;
         }
-        if (uri.startsWith("/api")) {
-            ipBlackHandler.add(ip);
-        }
         return UNAUTHORIZED;
-    }
-
-    private int tryAuth(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
-        String authorization = getParam(request, "Nav-Token");
-        if (StrUtil.isBlank(authorization)) {
-            return NONE;
-        }
-
-        try {
-            LoginBean loginBean = jwtHandler.parseToken(authorization);
-            if (loginBean != null) {
-                return SUCCESS;
-            }
-        } catch (Exception ignore) {
-        }
-        return UNAUTHORIZED;
-
-
-//        if (!authorization.startsWith(BASIC_PREFIX)) {
-//            return UNAUTHORIZED;
-//        }
-//        authorization = authorization.substring(BASIC_PREFIX.length());
-//
-//        if (StrUtil.isBlank(authorization)) {
-//            return UNAUTHORIZED;
-//        }
-//
-//        authorization = Base64.decodeStr(authorization);
-//
-//        List<String> split = StrUtil.split(authorization, ":", true, true);
-//        if (split.size() != 2) {
-//            return UNAUTHORIZED;
-//        }
-//        String username = split.get(0);
-//        String password = split.get(1);
-//
-//        if (StrUtil.isBlank(username) || StrUtil.isBlank(password)) {
-//            return UNAUTHORIZED;
-//        }
-//
-//        if (!password.contains(username)) {
-//            return UNAUTHORIZED;
-//        }
-//        password = password.replace(username, "");
-//        if (!Objects.equals(password, "1115")) {
-//            return UNAUTHORIZED;
-//        }
-//        return SUCCESS;
     }
 
     private boolean checkTimestamp(String timestamp) {

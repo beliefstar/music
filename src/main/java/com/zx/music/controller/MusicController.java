@@ -1,5 +1,6 @@
 package com.zx.music.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -13,6 +14,7 @@ import com.zx.music.util.Constants;
 import com.zx.music.util.ResultListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -25,9 +27,11 @@ import org.springframework.web.context.request.async.DeferredResult;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/music")
@@ -69,15 +73,11 @@ public class MusicController {
     @GetMapping("/search")
     public List<String> search(String keyword,
                               @RequestParam(value = "page", defaultValue = "1") Integer page) {
-
-        String host = "https://www.hifini.com";
-        String range = "1";
-        keyword = URLUtil.encode(keyword).replace("%", "_");
-        String url = StrUtil.format("{}/search-{}-{}-{}.htm", host, keyword, range, page);
-
-        String listContent = HttpUtil.get(url);
-        List<String> titles = ReUtil.findAll("(<a href=\"thread-\\w+.htm\">.*?</a>)", listContent, 1);
-        return titles;
+        List<Element> elements = Comm.search_raw(keyword, page);
+        if (CollUtil.isEmpty(elements)) {
+            return new ArrayList<>();
+        }
+        return elements.stream().map(Element::toString).collect(Collectors.toList());
     }
 
     @GetMapping("/getPlayUrl")
