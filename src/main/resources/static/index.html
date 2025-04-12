@@ -11,6 +11,9 @@
         .spinner-border {
             margin: 50px 0;
         }
+        .list-group-item button {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +70,10 @@
         })
     }
 
+    function buildUrl(id) {
+        return "api/music/resource/" + id + "?Nav-Token=" + NavToken
+    }
+
     $.ajax({
         url: "api/music/list",
         success(data) {
@@ -86,7 +93,21 @@
                     deleteItem(id)
                 })
 
-                li.append(aEl).append(btn)
+                let downloadBtn = $('<button type="button" class="btn btn-info btn-sm float-right" data-id="' + it.id + '" data-name="' + it.name + '">下载</button>')
+                downloadBtn.click(e => {
+                    let id = $(e.target).attr("data-id")
+                    let name = $(e.target).attr("data-name")
+                    const url = buildUrl(id);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = name;
+                    document.body.appendChild(link);
+                    link.click();
+
+                    document.body.removeChild(link);
+                })
+
+                li.append(aEl).append(btn).append(downloadBtn)
                 as.push(li)
             }
             $('#list-wrapper').html(as)

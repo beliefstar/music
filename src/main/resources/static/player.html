@@ -48,6 +48,39 @@
             margin: 0 auto;
             text-align: center;
         }
+        /* 按钮样式 */
+        .download-button {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 按钮悬停效果 */
+        .download-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 按钮点击效果 */
+        .download-button:active {
+            background-color: #004080;
+            transform: translateY(0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 按钮禁用状态 */
+        .download-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +120,12 @@
                     </div>
                 </div>
             </div>
-            <h4 id="musicNameText" style="margin: 20px 0"></h4>
+            <div style="margin: 20px 0;display: flex;align-content: center;align-items: center;justify-content: space-between;">
+                <div id="musicNameText" style="font-size: 1.5rem;"></div>
+                <button class="download-button" id="downloadMusicBtn">
+                    <span>下载</span>
+                </button>
+            </div>
             <div id="waveform"></div>
 
         </div>
@@ -183,6 +221,7 @@
     let $playRightBtn = $('#playRightBtn')
     let $nextMusicText = $('#nextMusicText')
     let $musicNameText = $('#musicNameText')
+    let $downloadMusicBtn = $('#downloadMusicBtn')
 
     params.forEach((v, k) => {
         if (k === 'id') {
@@ -225,11 +264,12 @@
         $loading.find('div').hide()
     }
 
+    function buildUrl(id) {
+        return "api/music/resource/" + id + "?Nav-Token=" + NavToken
+    }
     function doPlay(item) {
         $musicNameText.text(item.name)
-
-        let url = "api/music/resource/" + item.id + "?Nav-Token=" + NavToken
-        return wavesurferPlay(url)
+        return wavesurferPlay(buildUrl(item.id))
     }
 
     function loadMusicList() {
@@ -331,6 +371,18 @@
     $playRightBtn.click(() => {
         play((window.CusIdx + 1) % window.MusicList.length)
     })
+
+    $downloadMusicBtn.click(() => {
+        const item = window.MusicList[window.CusIdx];
+        const url = buildUrl(item.id);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = item.name;
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+    });
 </script>
 </body>
 </html>

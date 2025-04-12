@@ -6,7 +6,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-import cn.hutool.http.HttpGlobalConfig;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -20,12 +19,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Comm {
 
@@ -53,13 +49,18 @@ public class Comm {
     }
 
     public static void download(String url, String id) {
-        System.out.println(url);
-        HttpGlobalConfig.setMaxRedirectCount(999);
+        System.out.println("download: " + url);
         try (HttpResponse response = HttpRequest.get(url).timeout(60000)
-                .header("Referer", "https://www.hifini.com/")
-                .setFollowRedirects(true)
-                .setMaxRedirectCount(999)
+                .setFollowRedirects(false)
                 .execute()) {
+
+            if (response.getStatus() == 302) {
+                String location = response.header("location");
+                System.out.println("302: " + location);
+                download(location, id);
+                return;
+            }
+
             storeFile(response.bodyStream(), id);
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,23 +112,21 @@ public class Comm {
         List<SearchItem> list = new ArrayList<>();
         for (Element a : as) {
             String ref = a.attr("href");
-            if (ref.startsWith("thread-")) {
-                String name = parseName(a.text());
-                if (StrUtil.isBlank(ref) || StrUtil.isBlank(name)) {
-                    System.out.println(a);
-                    continue;
-                }
-                String id = Comm.buildStoreId(name);
-                if (exists(id)) {
-                    continue;
-                }
-                SearchItem si = new SearchItem();
-                si.setId(id);
-                si.setName(name + MUSIC_NAME_SUFFIX);
-                si.setThread(ref);
-                si.setCache(false);
-                list.add(si);
+            String name = parseName(a.text());
+            if (StrUtil.isBlank(ref) || StrUtil.isBlank(name)) {
+                System.out.println(a);
+                continue;
             }
+            String id = Comm.buildStoreId(name);
+            if (exists(id)) {
+                continue;
+            }
+            SearchItem si = new SearchItem();
+            si.setId(id);
+            si.setName(name + MUSIC_NAME_SUFFIX);
+            si.setThread(ref);
+            si.setCache(false);
+            list.add(si);
         }
         return list;
     }
@@ -203,8 +202,4 @@ public class Comm {
         return "";
     }
 
-
-    public static void main(String[] args) throws FileNotFoundException {
-
-    }
 }
