@@ -202,4 +202,12 @@ public class Comm {
         return "";
     }
 
+    public static boolean validBbsToken(String bbsToken) {
+        HttpRequest request = HttpRequest.get("https://www.hifini.com/my.htm")
+                .header("Cookie", "bbs_token=" + bbsToken);
+
+        try (HttpResponse response = request.execute()) {
+            return response.getStatus() == 200;
+        }
+    }
 }

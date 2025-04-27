@@ -71,27 +71,11 @@ public class SignatureFilter extends OncePerRequestFilter {
             return SUCCESS;
         }
 
-//        String ip = JakartaServletUtil.getClientIP(request);
-//        boolean isUnlockReq = uri.endsWith(UNLOCK_SUFFIX);
-//        if (ipBlackHandler.contains(ip) && !isUnlockReq) {
-//            return FORBIDDEN;
-//        }
-
         return tryAuth(request, response, filterChain);
-//        if (code == SUCCESS) {
-//            if (isUnlockReq) {
-//                ipBlackHandler.remove(ip);
-//            }
-//            return SUCCESS;
-//        }
-//        if (uri.startsWith("/api")) {
-//            ipBlackHandler.add(ip);
-//        }
-//        return code;
     }
 
     private int tryAuth(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
-        String authorization = getParam(request, "Nav-Token");
+        String authorization = getParam(request, "nav-token");
         if (StrUtil.isNotBlank(authorization)) {
             try {
                 LoginBean loginBean = jwtHandler.parseToken(authorization);

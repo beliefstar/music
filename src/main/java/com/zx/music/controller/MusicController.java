@@ -55,6 +55,11 @@ public class MusicController {
         return bbsToken;
     }
 
+    @GetMapping("/valid_bbsToken")
+    public Boolean validBbsToken() {
+        return Comm.validBbsToken(musicManager.getBbsToken());
+    }
+
     @GetMapping("/play")
     public Resource play(String id, HttpServletResponse response) {
         response.addHeader(HttpHeaders.CACHE_CONTROL,
