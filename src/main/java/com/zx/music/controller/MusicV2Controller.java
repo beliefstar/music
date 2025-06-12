@@ -52,7 +52,12 @@ public class MusicV2Controller {
                 si.setCache(true);
                 result.add(si);
             }
-            result.addAll(items);
+            for (SearchItem item : items) {
+                if (musicManager.exists(item.getName())) {
+                    continue;
+                }
+                result.add(item);
+            }
             items = result;
         }
         return items;

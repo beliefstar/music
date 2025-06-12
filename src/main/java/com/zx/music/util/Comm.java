@@ -210,4 +210,28 @@ public class Comm {
             return response.getStatus() == 200;
         }
     }
+
+    public static String queryDownloadUrl(String thread, String bbsToken) {
+        String url = "https://www.hifini.com/" + thread;
+        HttpRequest request = HttpRequest.get(url)
+                .header("Cookie", "bbs_token=" + bbsToken);
+        String listContent = request.execute().body();
+
+        List<String> titles = ReUtil.findAll("music: \\[(.*?)\\]", listContent, 1);
+        return Comm.parsePlayUrl(titles.get(0));
+    }
+
+
+    public static void main(String[] args) {
+//        String t = "thread-106.htm";
+//        String token = "B913yznE7cUXNjnWjIAJtIAHZdodup7D8iEnJmoP_2F3FUpn0h7FuSidh_2FYVUIUZ4bfjy3TSOnI0xstnhjTbfG9VJN56M_3D";
+//        System.out.println(queryDownloadUrl(t, token));
+        String u = "http://m704.music.126.net/20250430212951/62f2decc5eb3740447bbf8ee0955be32/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/32283600345/f29b/d599/f294/a7361dca69f85d80e3c027f2ec0550cd.mp3?vuutv=JyXveJ3j82TJO7epUCbSnYtLuUCGJzaTtFazCRio2335tJubSgZ3sU4fHtcR2xlbO5MpX1ejiHidB973dZ3I3KTSx9Kwsf3xgg+SczxkEF0=&authSecret=0000019686ccd05c10e90a649a050006";
+        System.out.println(FileNameUtil.mainName(u));
+        System.out.println(FileNameUtil.extName(u));
+
+        System.out.println(URLUtil.getPath(u));
+        System.out.println(FileNameUtil.mainName(URLUtil.getPath(u)));
+        System.out.println(FileNameUtil.extName(URLUtil.getPath(u)));
+    }
 }

@@ -108,18 +108,13 @@ public class MusicController {
                 return Constants.SERVICE_BUSY;
             }
             try {
-                String url = "https://www.hifini.com/" + thread;
-                HttpRequest request = HttpRequest.get(url)
-                        .header("Cookie", "bbs_token=" + musicManager.getBbsToken());
-                String listContent = request.execute().body();
-
-                List<String> titles = ReUtil.findAll("music: \\[(.*?)\\]", listContent, 1);
                 String playUrl;
                 try {
-                    playUrl = Comm.parsePlayUrl(titles.get(0));
+                    playUrl = Comm.queryDownloadUrl(thread, musicManager.getBbsToken());
                 } catch (Exception e) {
                     return Constants.SERVICE_ERROR;
                 }
+
                 if (StrUtil.isBlank(playUrl)) {
                     return Constants.SERVICE_ERROR;
                 }
