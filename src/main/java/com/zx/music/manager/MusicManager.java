@@ -79,4 +79,12 @@ public class MusicManager {
         }
         return list;
     }
+    public boolean exists(String id) {
+        for (MusicItem musicItem : musicItems) {
+            if (musicItem.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

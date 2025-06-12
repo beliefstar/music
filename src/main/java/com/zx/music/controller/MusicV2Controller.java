@@ -53,7 +53,7 @@ public class MusicV2Controller {
                 result.add(si);
             }
             for (SearchItem item : items) {
-                if (musicManager.exists(item.getName())) {
+                if (musicManager.exists(item.getId())) {
                     continue;
                 }
                 result.add(item);
