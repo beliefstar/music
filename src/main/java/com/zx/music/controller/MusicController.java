@@ -1,11 +1,7 @@
 package com.zx.music.controller;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
 import com.zx.music.bean.MusicItem;
 import com.zx.music.manager.MusicManager;
 import com.zx.music.util.AsyncExecutor;

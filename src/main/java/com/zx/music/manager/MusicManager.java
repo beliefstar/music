@@ -21,7 +21,7 @@ public class MusicManager {
     private final CopyOnWriteArrayList<MusicItem> musicItems = new CopyOnWriteArrayList<>();
 
     @Setter
-    private String bbsToken = "B913yznE7cUXNjnWjIAJtIAHZdodup7D8iEnJmoP_2F3FUpn0h7FuSidh_2FYVUIUZ4bfjy3TSOnI0xstnhjTbfG9VJN56M_3D";
+    private String bbsToken = "uUqtAqYsveA0Pnn6hTP9W1yv3xfoZKkZ5zrLqEzE_2B_2BMZU5QJpwIvHXKRxsR_2B85sNVmZ0FF051lJSuhfV_2FbWf9M2SVfY_3D";
 
     private synchronized void load() {
         File root = new File("store");
