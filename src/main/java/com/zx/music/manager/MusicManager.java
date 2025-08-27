@@ -1,8 +1,8 @@
 package com.zx.music.manager;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.util.StrUtil;
 import com.zx.music.bean.MusicItem;
+import com.zx.music.common.MusicExt;
+import com.zx.music.manager.bean.MusicName;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,13 +44,13 @@ public class MusicManager {
     }
 
     private MusicItem parseMusicId(String musicId, Date addTime) {
-        if (!StrUtil.endWith(musicId, ".mp3")) {
+        MusicName musicName = MusicName.of(musicId);
+        if (musicName == null || !MusicExt.contains(musicName.getExt())) {
             return null;
         }
-        String base64Str = musicId.substring(0, musicId.length() - 4);
-        String musicName = Base64.decodeStr(base64Str) + ".mp3";
+
         MusicItem mi = new MusicItem();
-        mi.setName(musicName);
+        mi.setName(musicName.decode());
         mi.setAddTime(addTime);
         mi.setId(musicId);
         return mi;
