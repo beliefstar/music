@@ -7,6 +7,7 @@ import cn.hutool.jwt.JWTUtil;
 import cn.hutool.jwt.JWTValidator;
 import com.alibaba.fastjson2.JSON;
 import com.zx.music.bean.LoginBean;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Date;
 @Component
 public class JwtHandler {
 
+    @Setter
     @Value("${JWT_TOKEN:fbf3a6a74df34b35a145d9bf341483cc}")
     private String jwtToken;
 

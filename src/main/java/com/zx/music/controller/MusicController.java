@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.zx.music.bean.MusicItem;
 import com.zx.music.manager.MusicManager;
+import com.zx.music.manager.bean.MusicName;
 import com.zx.music.util.AsyncExecutor;
 import com.zx.music.util.Comm;
 import com.zx.music.util.Constants;
@@ -16,6 +17,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -63,11 +65,17 @@ public class MusicController {
         return new FileSystemResource("store/" + id);
     }
 
-    @GetMapping(value = "/resource/{id}", produces = "audio/mpeg")
+    @GetMapping(value = "/resource/{id}")
     public ResponseEntity<Resource> playResource(@PathVariable("id") String id, HttpServletResponse response) {
+        MusicName musicName = MusicName.of(id);
+        if (musicName == null || !musicManager.exists(id)) {
+            return ResponseEntity.notFound().build();
+        }
         response.addHeader(HttpHeaders.CACHE_CONTROL,
                 CacheControl.maxAge(Duration.ofDays(365)).cachePublic().getHeaderValue());
-        return ResponseEntity.ok().body(new FileSystemResource("store/" + id));
+        return ResponseEntity.ok()
+                .contentType(new MediaType("audio", musicName.getExt()))
+                .body(new FileSystemResource("store/" + id));
     }
 
 
