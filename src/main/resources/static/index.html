@@ -35,7 +35,11 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+
                 <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                    <button type="button" class="btn btn-link justify-content-end" data-toggle="modal" data-target="#staticBackdrop">
+                        上传
+                    </button>
                     <form class="form-inline my-2 my-lg-0" id="search-form" method="get" action="/search.html">
                         <input name="keyword" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
                         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
@@ -52,6 +56,39 @@
     <ul class="list-group" id="list-wrapper">
     </ul>
 </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">上传文件</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <input type="file" id="uploadFile" accept="audio/*">
+                    </div>
+                </form>
+                <div class="progress" id="uploadProgressBar" style="display: none">
+                    <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="uploadBtn">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;margin: 0"></span>
+                    提交
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="/lib/jquery-3.7.1.min.js"></script>
 <!--<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.min.js"></script>-->
@@ -113,6 +150,59 @@
             $('#list-wrapper').html(as)
             $('#loading').remove()
         }
+    })
+
+
+    let $uploadBtn = $('#uploadBtn')
+    let $uploadForm = $('#uploadForm')
+    let $uploadFile = $('#uploadFile')
+    let $uploadProgressBar = $('#uploadProgressBar')
+    let $uploadProgress = $('#uploadProgress')
+
+    $uploadBtn.click(() => {
+
+        let fs = $uploadFile[0].files;
+
+        if (fs.length === 0) {
+            alert('请选择文件！');
+            return;
+        }
+
+        let formData = new FormData();
+
+        // 将文件添加到 FormData 对象
+        formData.append('file', $uploadFile[0].files[0]);
+
+        $uploadProgressBar.show();
+        $uploadBtn.attr("disabled", true).find("span").show();
+
+        // 使用 AJAX 上传文件
+        $.ajax({
+            url: '/api/v2/music/upload/multi', // 替换为服务器端接收文件的 URL
+            type: 'POST',
+            data: formData,
+            processData: false, // 禁止 jQuery 自动转换数据
+            contentType: false, // 禁止设置默认的 Content-Type
+            xhr: function() {
+                let xhr = $.ajaxSettings.xhr();
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        let percent = Math.floor((e.loaded * 100) / e.total);
+                        console.log(percent + "%"); // Update the upload progress here
+                        $uploadProgress.css('width', percent + '%').attr('aria-valuenow', percent);
+                        $uploadProgress.html(percent + "%");
+                    }
+                };
+                return xhr;
+            },
+            success: function (response) {
+                $uploadProgressBar.hide();
+                window.location.reload();
+            },
+            error: function () {
+                alert('上传失败！');
+            }
+        })
     })
 </script>
 </body>

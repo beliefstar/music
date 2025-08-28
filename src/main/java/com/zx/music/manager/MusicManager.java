@@ -63,6 +63,7 @@ public class MusicManager {
 
     public void put(String id, Date addTime) {
         MusicItem musicItem = parseMusicId(id, addTime);
+        musicItems.removeIf(t -> t.getId().equals(id));
         musicItems.add(0, musicItem);
     }
 

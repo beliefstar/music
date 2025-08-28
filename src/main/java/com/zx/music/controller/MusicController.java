@@ -9,7 +9,6 @@ import com.zx.music.util.AsyncExecutor;
 import com.zx.music.util.Comm;
 import com.zx.music.util.Constants;
 import com.zx.music.util.ResultListener;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
@@ -145,13 +143,5 @@ public class MusicController {
     public Boolean delete(String id) {
         musicManager.remove(id);
         return new File("store/" + id).delete();
-    }
-
-    @PostMapping("/upload/{id}")
-    public void upload(@PathVariable String id, HttpServletRequest req) throws IOException {
-        if (Comm.exists(id)) {
-            return;
-        }
-        Comm.storeFile(req.getInputStream(), id);
     }
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.zx.music.bean.MusicItem;
 import com.zx.music.bean.SearchItem;
 import com.zx.music.manager.MusicManager;
+import com.zx.music.manager.bean.MusicName;
 import com.zx.music.util.Comm;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,10 +74,28 @@ public class MusicV2Controller {
     @PostMapping("/upload/{id}")
     public void upload(@PathVariable String id, HttpServletRequest req) throws IOException {
         File file = Comm.storeFile(id);
-        if (file.exists() && file.length() >= req.getContentLengthLong()) {
-            return;
+        if (file.exists()) {
+            if (file.length() >= req.getContentLengthLong()) {
+                return;
+            }
+            file.delete();
         }
         Comm.storeFile(req.getInputStream(), id);
         musicManager.put(id, new Date());
+    }
+
+
+    @PostMapping("/upload/multi")
+    public void uploadMulti(MultipartFile file) throws IOException {
+        MusicName musicName = MusicName.ofName(file.getOriginalFilename());
+        if (musicName == null) {
+            return;
+        }
+        File diskFile = Comm.storeFile(musicName.getMusicId());
+        if (diskFile.exists()) {
+            diskFile.delete();
+        }
+        Comm.storeFile(file.getInputStream(), musicName.getMusicId());
+        musicManager.put(musicName.getMusicId(), new Date());
     }
 }

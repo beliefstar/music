@@ -35,6 +35,23 @@ public class MusicName {
         return musicName;
     }
 
+
+    public static MusicName ofName(String name) {
+        if (StrUtil.isBlank(name)) {
+            return null;
+        }
+        String ext = FileNameUtil.extName(name);
+        String main = FileNameUtil.mainName(name);
+
+        String musicId = Base64.encodeUrlSafe(main) + "." + ext;
+
+        MusicName musicName = new MusicName();
+        musicName.setMusicId(musicId);
+        musicName.setName(main);
+        musicName.setExt(ext);
+        return musicName;
+    }
+
     public String decode() {
         return name + "." + ext;
     }

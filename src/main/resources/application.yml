@@ -7,6 +7,10 @@ spring:
         cachecontrol:
           cache-public: true
           max-age: 31536000
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
 
 server:
   port: 8080
