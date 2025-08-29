@@ -121,7 +121,7 @@
 
                 let aEl = $('<a>')
                 aEl.attr("href", "player.html?id=" + it.id)
-                aEl.text(it.name)
+                aEl.text(`${it.artist}-${it.name}`)
                 aEl.attr("data-id", it.id)
 
                 let btn = $('<button type="button" class="btn btn-danger btn-sm float-right" data-id="' + it.id + '">删除</button>')

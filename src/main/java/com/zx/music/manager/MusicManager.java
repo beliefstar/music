@@ -50,7 +50,8 @@ public class MusicManager {
         }
 
         MusicItem mi = new MusicItem();
-        mi.setName(musicName.decode());
+        mi.setName(musicName.getName());
+        mi.setArtist(musicName.getArtist());
         mi.setAddTime(addTime);
         mi.setId(musicId);
         return mi;

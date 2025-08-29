@@ -17,6 +17,8 @@ public class MusicName {
 
     private String name;
 
+    private String artist;
+
     private String ext;
 
     public static MusicName of(String musicId) {
@@ -32,11 +34,12 @@ public class MusicName {
         musicName.setMusicId(musicId);
         musicName.setName(name);
         musicName.setExt(ext);
+        parseArtist(musicName);
         return musicName;
     }
 
 
-    public static MusicName ofName(String name) {
+    public static MusicName ofRawName(String name) {
         if (StrUtil.isBlank(name)) {
             return null;
         }
@@ -49,10 +52,42 @@ public class MusicName {
         musicName.setMusicId(musicId);
         musicName.setName(main);
         musicName.setExt(ext);
+        parseArtist(musicName);
         return musicName;
     }
 
+    private static void parseArtist(MusicName musicName) {
+        musicName.setArtist("");
+        String name = musicName.getName();
+
+        if (name.contains("《") && name.contains("》")) {
+            int l = name.indexOf('《');
+            int r = name.indexOf('》');
+            if (l < r) {
+                String artist = name.substring(0, l).trim();
+                String title = name.substring(l + 1, r).trim();
+
+                musicName.setName(title);
+                musicName.setArtist(artist);
+            }
+        }
+
+        if (name.contains("-")) {
+            String[] parts = name.split("-");
+            if (parts.length >= 2) {
+                String artist = parts[0].trim();
+                String part1 = parts[1];
+                if (part1.contains(".")) {
+                    part1 = part1.substring(0, part1.lastIndexOf('.'));
+                }
+                String title = part1.trim();
+                musicName.setName(title);
+                musicName.setArtist(artist);
+            }
+        }
+    }
+
     public String decode() {
-        return name + "." + ext;
+        return name + artist + "." + ext;
     }
 }

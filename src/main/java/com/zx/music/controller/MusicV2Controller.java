@@ -87,7 +87,7 @@ public class MusicV2Controller {
 
     @PostMapping("/upload/multi")
     public void uploadMulti(MultipartFile file) throws IOException {
-        MusicName musicName = MusicName.ofName(file.getOriginalFilename());
+        MusicName musicName = MusicName.ofRawName(file.getOriginalFilename());
         if (musicName == null) {
             return;
         }
