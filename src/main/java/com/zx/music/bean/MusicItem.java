@@ -12,5 +12,7 @@ public class MusicItem {
 
     private String artist;
 
+    private String ext;
+
     private Date addTime;
 }

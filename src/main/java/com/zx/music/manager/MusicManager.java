@@ -54,6 +54,7 @@ public class MusicManager {
         mi.setArtist(musicName.getArtist());
         mi.setAddTime(addTime);
         mi.setId(musicId);
+        mi.setExt(musicName.getExt());
         return mi;
     }
 

@@ -1,6 +1,7 @@
 package com.zx.music.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.zx.music.bean.MusicItem;
 import com.zx.music.bean.SearchItem;
 import com.zx.music.manager.MusicManager;
@@ -50,7 +51,7 @@ public class MusicV2Controller {
             for (MusicItem item : musicItems) {
                 SearchItem si = new SearchItem();
                 si.setId(item.getId());
-                si.setName(item.getName());
+                si.setName(StrUtil.format("{}-{}.{}", item.getArtist(), item.getName(), item.getExt()));
                 si.setCache(true);
                 result.add(si);
             }
