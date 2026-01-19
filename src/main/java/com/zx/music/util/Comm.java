@@ -13,7 +13,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.zx.music.bean.SearchItem;
-import com.zx.music.manager.MusicManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -226,21 +225,4 @@ public class Comm {
         return titles.get(0);
     }
 
-
-    public static void main(String[] args) {
-        String s = "<script>\n" +
-                "\tconst ap = new APlayer({element:document.getElementById(\"FoxSplayer\"),autoplay:false,preload:\"none\",mutex:true,theme:\"#090\",audio:[{name:'红玫瑰',artist:'陈奕迅',url:'https://www.hifiti.com/getmusic.htm?key=OERiSSU4tmlpC8sDvl7vNvyBP7Z90a88NZBwtsYnSztrh0FR2RGsRiLMZeC2HGfi_2FjeBQKjp8Dm9CLdIBEvGrA_2FNHDlu1BVLkaRtmLVOjrojrbVkpSwNTUU8chEXlmGQK9vp9dOhd6TjO2qvYADszyjrIiG9Wkyw',cover:'https://img1.kuwo.cn/star/albumcover/300/s4s27/17/4193958611.jpg'}]});\n" +
-                "</script>";
-
-        String url = HOST + "/thread-1516.htm";
-        HttpRequest request = HttpRequest.get(url)
-                .header("Cookie", "bbs_token=" + new MusicManager().getBbsToken());
-        String listContent = request.execute().body();
-
-
-        List<String> titles = ReUtil.findAll("FoxSplayer.*?url:'(.*?)'", listContent, 1);
-        for (String title : titles) {
-            System.out.println(title);
-        }
-    }
 }

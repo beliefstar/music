@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>响应式音乐播放器</title>
+    <title>NavMusic</title>
     <!-- Bootstrap CSS -->
     <link href="./lib/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 图标 -->
@@ -27,6 +27,13 @@
             overflow: hidden;
             width: 100%;
             margin: 20px auto;
+        }
+
+        .download-button {
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            z-index: 0;
         }
 
         .album-art-container {
@@ -342,6 +349,8 @@
     <div class="row">
         <div class="col-12">
             <div class="player-container">
+                <button type="button" class="btn btn-info btn-sm download-button" id="downloadBtn" >下载</button>
+
                 <div class="album-art-container">
                     <img id="albumArt" class="album-art" src="./img/nav_logo.png" alt="封面">
                 </div>
@@ -419,6 +428,7 @@
             this.songArtist = document.getElementById('songArtist');
             this.albumArt = document.getElementById('albumArt');
             this.playlistContainer = document.getElementById('playlistContainer');
+            this.downloadBtn = document.getElementById('downloadBtn');
 
             // 播放模式按钮
             this.orderModeBtn = document.getElementById('orderModeBtn');
@@ -449,6 +459,7 @@
             this.audio.volume = this.volumeSlider.value;
 
             // 事件监听
+            this.downloadBtn.addEventListener('click', () => this.downloadMusic());
             this.playBtn.addEventListener('click', () => this.togglePlay());
             this.prevBtn.addEventListener('click', () => this.prevSong());
             this.nextBtn.addEventListener('click', () => this.nextSong());
@@ -735,6 +746,17 @@
                     item.classList.remove('active');
                 }
             });
+        }
+
+        downloadMusic() {
+            let it = this.playlist[this.currentSongIndex];
+            const link = document.createElement('a');
+            link.href = it.url;
+            link.download = `${it.artist}-${it.title}`;
+            document.body.appendChild(link);
+            link.click();
+
+            document.body.removeChild(link);
         }
     }
 

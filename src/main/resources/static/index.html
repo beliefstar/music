@@ -108,7 +108,7 @@
     }
 
     function buildUrl(id) {
-        return "api/music/resource/" + id + "?Nav-Token=" + NavToken
+        return "api/music/resource/" + id + "?nav-token=" + NavToken
     }
 
     $.ajax({
@@ -118,6 +118,8 @@
             for (let i = 0; i < data.length; i++) {
                 let it = data[i]
                 let li = $("<li class='list-group-item'>")
+
+                let musicName = `${it.artist}-${it.name}`
 
                 let aEl = $('<a>')
                 aEl.attr("href", "player.html?id=" + it.id)
@@ -130,7 +132,7 @@
                     deleteItem(id)
                 })
 
-                let downloadBtn = $('<button type="button" class="btn btn-info btn-sm float-right" data-id="' + it.id + '" data-name="' + it.name + '">下载</button>')
+                let downloadBtn = $('<button type="button" class="btn btn-info btn-sm float-right" data-id="' + it.id + '" data-name="' + musicName + '">下载</button>')
                 downloadBtn.click(e => {
                     let id = $(e.target).attr("data-id")
                     let name = $(e.target).attr("data-name")
