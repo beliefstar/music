@@ -37,7 +37,7 @@ public class MusicV2Controller {
     public ResponseEntity<Resource> playResource(@PathVariable("id") String id, HttpServletResponse response) {
         response.addHeader(HttpHeaders.CACHE_CONTROL,
                 CacheControl.maxAge(Duration.ofDays(365)).cachePublic().getHeaderValue());
-        return ResponseEntity.ok().body(new FileSystemResource("store/" + id));
+        return ResponseEntity.ok().body(new FileSystemResource(Comm.getMusicFile(id)));
     }
 
 
@@ -69,19 +69,19 @@ public class MusicV2Controller {
     @GetMapping("/delete")
     public Boolean delete(String id) {
         musicManager.remove(id);
-        return new File("store/" + id).delete();
+        return Comm.getMusicFile(id).delete();
     }
 
     @PostMapping("/upload/{id}")
     public void upload(@PathVariable String id, HttpServletRequest req) throws IOException {
-        File file = Comm.storeFile(id);
+        File file = Comm.getMusicFile(id);
         if (file.exists()) {
             if (file.length() >= req.getContentLengthLong()) {
                 return;
             }
             file.delete();
         }
-        Comm.storeFile(req.getInputStream(), id);
+        Comm.storeMusicFile(req.getInputStream(), id);
         musicManager.put(id, new Date());
     }
 
@@ -92,11 +92,11 @@ public class MusicV2Controller {
         if (musicName == null) {
             return;
         }
-        File diskFile = Comm.storeFile(musicName.getMusicId());
+        File diskFile = Comm.getMusicFile(musicName.getMusicId());
         if (diskFile.exists()) {
             diskFile.delete();
         }
-        Comm.storeFile(file.getInputStream(), musicName.getMusicId());
+        Comm.storeMusicFile(file.getInputStream(), musicName.getMusicId());
         musicManager.put(musicName.getMusicId(), new Date());
     }
 }

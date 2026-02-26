@@ -60,7 +60,7 @@ public class MusicController {
     public Resource play(String id, HttpServletResponse response) {
         response.addHeader(HttpHeaders.CACHE_CONTROL,
                 CacheControl.maxAge(Duration.ofDays(365)).cachePublic().getHeaderValue());
-        return new FileSystemResource("store/" + id);
+        return new FileSystemResource(new File(Comm.getMusicStoreDir(), id));
     }
 
     @GetMapping(value = "/resource/{id}")
@@ -73,7 +73,7 @@ public class MusicController {
                 CacheControl.maxAge(Duration.ofDays(365)).cachePublic().getHeaderValue());
         return ResponseEntity.ok()
                 .contentType(new MediaType("audio", musicName.getExt()))
-                .body(new FileSystemResource("store/" + id));
+                .body(new FileSystemResource(Comm.getMusicFile(id)));
     }
 
 
@@ -142,6 +142,6 @@ public class MusicController {
     @GetMapping("/delete")
     public Boolean delete(String id) {
         musicManager.remove(id);
-        return new File("store/" + id).delete();
+        return Comm.getMusicFile(id).delete();
     }
 }

@@ -3,6 +3,7 @@ package com.zx.music.manager;
 import com.zx.music.bean.MusicItem;
 import com.zx.music.common.MusicExt;
 import com.zx.music.manager.bean.MusicName;
+import com.zx.music.util.Comm;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +25,7 @@ public class MusicManager {
     private String bbsToken = "uUqtAqYsveA0Pnn6hTP9W1yv3xfoZKkZ5zrLqEzE_2B_2BMZU5QJpwIvHXKRxsR_2B85sNVmZ0FF051lJSuhfV_2FbWf9M2SVfY_3D";
 
     private synchronized void load() {
-        File root = new File("store");
+        File root = Comm.getMusicStoreDir();
         if (!root.exists()) {
             root.mkdirs();
             return;

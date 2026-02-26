@@ -2,7 +2,9 @@ package com.zx.music.util;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -30,6 +32,33 @@ public class Comm {
     public static final String HOST = "https://www.hifiti.com";
 
     public static final String MUSIC_NAME_SUFFIX = ".mp3";
+
+    public static File getStoreDir() {
+        return new File("store");
+    }
+
+    public static File getMusicStoreDir() {
+        return FileUtil.mkdir(new File(getStoreDir(), "music"));
+    }
+
+    public static File getMusicFile(String id) {
+        return new File(getMusicStoreDir(), id);
+    }
+
+    public static File getLyricStoreDir() {
+        return FileUtil.mkdir(new File(getStoreDir(), "lyric"));
+    }
+
+    public static File getLyricFile(String musicId) {
+        String main = FileNameUtil.mainName(musicId);
+        return new File(getLyricStoreDir(), main + ".lrc");
+    }
+
+    public static File getLyricTempFile(String musicId) {
+        String main = FileNameUtil.mainName(musicId);
+        return new File(getLyricStoreDir(), main + ".last");
+    }
+
 
     public static String parsePlayUrlPhp(String url) {
         url = StrUtil.trim(url);
@@ -65,14 +94,14 @@ public class Comm {
                 return;
             }
 
-            storeFile(response.bodyStream(), id);
+            storeMusicFile(response.bodyStream(), id);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void storeFile(InputStream in, String id) {
-        try (FileOutputStream out = new FileOutputStream("store/" + id)) {
+    public static void storeMusicFile(InputStream in, String id) {
+        try (FileOutputStream out = new FileOutputStream(getMusicFile(id))) {
             IoUtil.copy(in, out);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -84,11 +113,7 @@ public class Comm {
     }
 
     public static boolean exists(String id) {
-        return new File("store/" + id).exists();
-    }
-
-    public static File storeFile(String id) {
-        return new File("store/" + id);
+        return getMusicFile(id).exists();
     }
 
     public static List<Element> search_raw(String keyword, int page) {
