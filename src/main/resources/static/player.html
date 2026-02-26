@@ -22,6 +22,19 @@
             min-height: 100vh;
         }
 
+        .background {
+            width: calc(100% + 20px); /* 补偿margin扩大 */
+            height: calc(100% + 20px);
+            margin: -10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background-image: url("./img/bg.jpg");
+            background-size: cover;
+            filter: blur(5px);
+        }
+
         .player-container {
             background-color: white;
             border-radius: 15px;
@@ -62,19 +75,19 @@
             overflow: hidden;
             margin: 20px auto;
             box-shadow: 0 0 15px rgba(50, 50, 50, 0.2);
-            width: 200px;
-            height: 200px;
+            width: 300px;
+            height: 300px;
             border-radius: 50%;
         }
 
         .album-art {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 90%;
-            height: 90%;
+            top: 50px;
+            left: 50px;
+            width: 200px;
+            height: 200px;
             object-fit: contain;
-            transform-origin: 90px 100px;
+            transform-origin: 100px 100px;
         }
 
         .song-info {
@@ -409,12 +422,16 @@
                 width: 100%;
                 margin: 20px auto;
             }
+            .left-panel {
+                display: none;
+            }
         }
 
         /* 动画效果 */
         @keyframes rotateAlbumArt {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.5); }
+            100% { transform: rotate(360deg) scale(1); }
         }
 
         .rotate {
@@ -446,6 +463,8 @@
     </style>
 </head>
 <body>
+<div class="background"></div>
+
 <div class="container">
     <div class="row">
         <div class="col-12" style="padding: 0">
@@ -724,7 +743,7 @@
             this.audio.src = song.url;
             this.songTitle.textContent = song.title || '未知歌曲';
             this.songArtist.textContent = song.artist || '未知艺术家';
-            this.albumArt.src = song.cover || './img/nav_logo.png';
+            this.albumArt.src = song.album || './img/nav_logo.png';
 
             // 重置进度条
             this.progressBar.style.width = '0%';
@@ -1134,6 +1153,12 @@
     function buildUrl(id) {
         return "api/music/resource/" + id + "?nav-token=" + NavToken
     }
+
+    function buildAlbumUrl(id) {
+        // http://localhost:8080/api/v2/album/image?musicId=5byg5p2w44CK5Yu_5b-Y5b-D5a6J44CL.mp3
+        return "api/v2/album/image?musicId=" + id + "&nav-token=" + NavToken
+    }
+
     function findIdx(reqId) {
         for (let i = 0; i < window.MusicList.length; i++) {
             let it = window.MusicList[i]
@@ -1167,6 +1192,7 @@
                         artist: item['artist'],
                         id: item['id'],
                         url: buildUrl(item['id']),
+                        album: buildAlbumUrl(item['id'])
                     })
                 }
                 console.log(list)

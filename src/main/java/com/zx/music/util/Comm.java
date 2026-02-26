@@ -59,6 +59,17 @@ public class Comm {
         return new File(getLyricStoreDir(), main + ".last");
     }
 
+    public static File getAlbumDir() {
+        return FileUtil.mkdir(new File(getStoreDir(), "album"));
+    }
+
+    public static File getAlbumImageDir() {
+        return FileUtil.mkdir(new File(getAlbumDir(), "image"));
+    }
+
+    public static File getDefaultAlbumImage() {
+        return new File(getAlbumDir(), "default.png");
+    }
 
     public static String parsePlayUrlPhp(String url) {
         url = StrUtil.trim(url);
