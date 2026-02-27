@@ -414,16 +414,49 @@
         }
 
         @media (max-width: 576px) {
+            .col-12 {
+                padding-left: 0;
+                padding-right: 0;
+            }
             .player-container {
                 background-color: white;
-                border-radius: 15px;
+                border-radius: 0;
                 box-shadow: 0 0 0;
                 overflow: hidden;
                 width: 100%;
-                margin: 20px auto;
+                margin-top: 0;
+            }
+            .download-button {
+                right: 15px;
+                top: 10px;
+            }
+            .player-content {
+                flex-direction: column;
+            }
+            .album-art-container {
+                border-radius: 0;
+                width: 200px;
+                height: 200px;
+            }
+            .album-art {
+                top: 0;
+                left: 0;
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+            }
+            .lyrics-wrapper {
+                height: 150px;
             }
             .left-panel {
-                display: none;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            .right-panel {
+                padding: 0;
+            }
+            .lyrics-container {
+                margin-top: 0;
             }
         }
 
@@ -495,7 +528,12 @@
     <div class="row">
         <div class="col-12">
             <div class="player-container">
-                <button type="button" class="btn btn-info btn-sm download-button" id="downloadBtn" >下载</button>
+                <button type="button" class="btn btn-light btn-sm download-button" id="downloadBtn" >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                    </svg>
+                </button>
 
                 <div class="player-content">
                     <div class="left-panel">
@@ -707,6 +745,7 @@
             this.audio.addEventListener('timeupdate', () => this.updateProgress());
             this.audio.addEventListener('ended', () => this.songEnded());
             // this.audio.addEventListener('loadedmetadata', () => this.updateSongInfo());
+            this.lyricsWrapper.addEventListener('click', () => this.lyricsWrapperClick());
 
             // 播放模式按钮事件
             this.orderModeBtn.addEventListener('click', () => this.setPlayMode(PLAY_MODE.ORDER));
@@ -721,6 +760,20 @@
             if (this.playlist.length > 0) {
                 this.loadSong(this.currentSongIndex);
                 this.renderPlaylist();
+            }
+        }
+
+        lyricsWrapperClick() {
+            // 点击歌词区域时，判断当前屏幕宽度如果小于等于576，则把页面元素left-panel隐藏，把lyricsWrapper的高度设置为390px，否则不做处理
+            if (window.innerWidth <= 576) {
+                const leftPanel = document.querySelector('.left-panel');
+                if (leftPanel.style.display === 'none') {
+                    leftPanel.style.display = 'block';
+                    this.lyricsWrapper.style.height = '150px';
+                } else {
+                    leftPanel.style.display = 'none';
+                    this.lyricsWrapper.style.height = '390px';
+                }
             }
         }
 
