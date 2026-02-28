@@ -6,11 +6,14 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpGlobalConfig;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import com.zx.music.lyric.LrcValidator;
 import com.zx.music.lyric.LyricProvider;
+import com.zx.music.util.Comm;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.net.HttpCookie;
@@ -21,6 +24,7 @@ import java.util.List;
  * @creatAt 2026-02-25 17:17
  */
 @Service
+@Order(2)
 public class XiaoJiangClubProvider implements LyricProvider {
 
     public static final String HOST = "https://xiaojiangclub.com";
@@ -31,7 +35,11 @@ public class XiaoJiangClubProvider implements LyricProvider {
         if (StrUtil.isBlank(searchLink)) {
             return null;
         }
-        return getByLyricLink(searchLink);
+        String lyricContent = getByLyricLink(searchLink);
+        if (LrcValidator.isValidLrc(lyricContent)) {
+             return lyricContent;
+        }
+        return null;
     }
 
     private String doGet(String url) {
@@ -74,7 +82,7 @@ public class XiaoJiangClubProvider implements LyricProvider {
 
 //            System.out.printf("title: %s, artist: %s, album: %s, lyricLink: %s\n", title, artist, album, lyricLink);
 
-            if (StrUtil.equalsIgnoreCase(title, musicName) && StrUtil.equals(artist, musicArtist)) {
+            if (Comm.compare(title, musicName) && Comm.compare(artist, musicArtist)) {
                 return lyricLink;
             }
         }
@@ -92,9 +100,11 @@ public class XiaoJiangClubProvider implements LyricProvider {
     }
 
     public static void main(String[] args) {
-        XiaoJiangClubProvider s = new XiaoJiangClubProvider();
-        String lyric = s.getLyric("无数", "薛之谦");
-        System.out.println(lyric);
+//        XiaoJiangClubProvider s = new XiaoJiangClubProvider();
+//        String lyric = s.getLyric("无数", "薛之谦");
+//        System.out.println(lyric);
 
+        System.out.println(StrUtil.containsIgnoreCase("GEM邓紫棋", "邓紫棋"));
+        System.out.println(StrUtil.containsIgnoreCase("asdfDsdfSDF", "dfs"));
     }
 }

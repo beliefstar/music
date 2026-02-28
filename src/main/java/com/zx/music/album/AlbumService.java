@@ -4,24 +4,21 @@ package com.zx.music.album;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpGlobalConfig;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.zx.music.manager.bean.MusicName;
 import com.zx.music.util.AsyncExecutor;
 import com.zx.music.util.Comm;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -35,11 +32,13 @@ public class AlbumService {
 
     private Map<String, AlbumData> albumMap;
 
-
     private final Cache<String, Long> cache = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(Duration.ofHours(2))
             .build();
+
+    @Autowired
+    private List<AlbumProvider> albumProviders;
 
     @PostConstruct
     public void loadData() {
@@ -105,7 +104,7 @@ public class AlbumService {
             return null;
         }
 
-        return loadImageFromSearch(musicId);
+        return loadFromProvider(musicId);
     }
 
     private synchronized boolean check(String musicId) {
@@ -117,65 +116,35 @@ public class AlbumService {
         return true;
     }
 
-    private File loadImageFromSearch(String musicId) {
-        // GEThttps://itunes.apple.com/search?term=%E6%9A%82%E6%97%B6%E7%9A%84%E8%AE%B0%E5%8F%B7&media=music&entity=song&country=cn&limit=50
-        MusicName musicName = MusicName.of(musicId);
-        if (musicName == null) {
-            return null;
-        }
-
-        String url = "https://itunes.apple.com/search?term=" + musicName.getName() + "&media=music&entity=song&country=cn&limit=10";
-        try (HttpResponse response = HttpRequest.get(url).timeout(HttpGlobalConfig.getTimeout()).execute()) {
-            if (!response.isOk()) {
-                return null;
-            }
-            JSONObject jo = JSON.parseObject(response.body());
-            if (jo.getIntValue("resultCount") <= 0) {
-                return null;
-            }
-            JSONArray results = jo.getJSONArray("results");
-            for (int i = 0; i < results.size(); i++) {
-                JSONObject it = results.getJSONObject(i);
-                String trackName = it.getString("trackName");
-                String artistName = it.getString("artistName");
-                String albumName = it.getString("collectionName");
-                String imageUrl = it.getString("artworkUrl100");
-
-                if (StrUtil.equalsIgnoreCase(artistName, musicName.getArtist())) {
-                    updateMusicAlbum(musicId, albumName);
-
-                    imageUrl = resize(imageUrl);
-
-                    File file = new File(Comm.getAlbumImageDir(), Base64.encodeUrlSafe(albumName) + ".jpg");
-                    try (HttpResponse imageResponse = HttpRequest.get(imageUrl).timeout(HttpGlobalConfig.getTimeout()).execute()) {
-                        if (!imageResponse.isOk()) {
-                            return null;
-                        }
-                        FileUtil.writeBytes(imageResponse.bodyBytes(), file);
-                        return file;
-                    } catch (Exception e) {
-                        return null;
-                    }
+    private File loadFromProvider(String musicId) {
+        for (AlbumProvider provider : albumProviders) {
+            File f = provider.getAlbumImage(musicId, getAlbum(musicId), albumName -> {
+                if (StrUtil.isBlank(albumName)) {
+                    String mainName = FileUtil.mainName(musicId);
+                    return new File(Comm.getAlbumImageDir(), mainName + ".jpg");
                 }
+                updateMusicAlbum(musicId, albumName);
+                return new File(Comm.getAlbumImageDir(), Base64.encodeUrlSafe(albumName) + ".jpg");
+            });
+            if (f != null) {
+                return f;
             }
         }
         return null;
     }
 
-    private String resize(String imageUrl) {
-        if (StrUtil.isBlank(imageUrl)) {
-            return imageUrl;
-        }
-        return imageUrl.replace("100x100", "600x600");
-    }
-
     private File loadImageFromDisk(String musicId) {
         String album = getAlbum(musicId);
+
+        String mainName;
         if (StrUtil.isBlank(album)) {
-            return null;
+            mainName = FileUtil.mainName(musicId);
+        } else {
+            mainName = Base64.encodeUrlSafe(album);
         }
+
         File albumDir = Comm.getAlbumImageDir();
-        String fileName = Base64.encodeUrlSafe(album) + ".jpg";
+        String fileName = mainName + ".jpg";
         File file = new File(albumDir, fileName);
         if (!file.exists()) {
             return null;

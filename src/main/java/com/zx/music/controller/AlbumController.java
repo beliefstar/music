@@ -2,7 +2,6 @@ package com.zx.music.controller;
 
 
 import com.zx.music.album.AlbumService;
-import com.zx.music.util.Comm;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -32,10 +31,15 @@ public class AlbumController {
     public ResponseEntity<Resource> getAlbumImage(String musicId, HttpServletResponse response) {
         File file = albumService.getAlbumImage(musicId);
         if (file == null || !file.exists()) {
-            return ResponseEntity.ok().body(new FileSystemResource(Comm.getDefaultAlbumImage()));
+            return ResponseEntity.notFound().build();
         }
         response.addHeader(HttpHeaders.CACHE_CONTROL,
                 CacheControl.maxAge(Duration.ofDays(365)).cachePublic().getHeaderValue());
         return ResponseEntity.ok().body(new FileSystemResource(file));
+    }
+
+    @GetMapping("/name")
+    public String getAlbum(String musicId) {
+        return albumService.getAlbum(musicId);
     }
 }

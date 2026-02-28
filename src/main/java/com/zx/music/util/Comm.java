@@ -261,4 +261,10 @@ public class Comm {
         return titles.get(0);
     }
 
+    public static boolean compare(String source, String target) {
+        return StrUtil.equalsIgnoreCase(source, target)
+                || StrUtil.containsIgnoreCase(source, target)
+                || StrUtil.containsIgnoreCase(target, source);
+    }
+
 }
