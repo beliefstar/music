@@ -4,7 +4,6 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -50,12 +49,12 @@ public class Comm {
     }
 
     public static File getLyricFile(String musicId) {
-        String main = FileNameUtil.mainName(musicId);
+        String main = Comm.mainName(musicId);
         return new File(getLyricStoreDir(), main + ".lrc");
     }
 
     public static File getLyricTempFile(String musicId) {
-        String main = FileNameUtil.mainName(musicId);
+        String main = Comm.mainName(musicId);
         return new File(getLyricStoreDir(), main + ".last");
     }
 
@@ -267,4 +266,19 @@ public class Comm {
                 || StrUtil.containsIgnoreCase(target, source);
     }
 
+    public static String extName(String name) {
+        int i = name.lastIndexOf(".");
+        if (i == -1 || i == name.length() - 1) {
+            return name;
+        }
+        return name.substring(i + 1);
+    }
+
+    public static String mainName(String name) {
+        int i = name.lastIndexOf(".");
+        if (i == -1) {
+            return name;
+        }
+        return name.substring(0, i);
+    }
 }

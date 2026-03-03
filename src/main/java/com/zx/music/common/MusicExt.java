@@ -12,6 +12,7 @@ public enum MusicExt {
 
     MP3("mp3"),
     WAV("wav"),
+    FLAC("flac"),
 
     ;
     private final String ext;

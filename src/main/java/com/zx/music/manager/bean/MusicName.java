@@ -2,9 +2,11 @@ package com.zx.music.manager.bean;
 
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.StrUtil;
+import com.zx.music.util.Comm;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author xzhen
@@ -25,8 +27,8 @@ public class MusicName {
         if (StrUtil.isBlank(musicId)) {
             return null;
         }
-        String ext = FileNameUtil.extName(musicId);
-        String main = FileNameUtil.mainName(musicId);
+        String ext = Comm.extName(musicId);
+        String main = Comm.mainName(musicId);
 
         String name = Base64.decodeStr(main);
 
@@ -38,13 +40,12 @@ public class MusicName {
         return musicName;
     }
 
-
     public static MusicName ofRawName(String name) {
         if (StrUtil.isBlank(name)) {
             return null;
         }
-        String ext = FileNameUtil.extName(name);
-        String main = FileNameUtil.mainName(name);
+        String ext = Comm.extName(name);
+        String main = Comm.mainName(name);
 
         String musicId = Base64.encodeUrlSafe(main) + "." + ext;
 
@@ -73,13 +74,10 @@ public class MusicName {
         }
 
         if (name.contains("-")) {
-            String[] parts = name.split("-");
-            if (parts.length >= 2) {
-                String artist = parts[0].trim();
-                String part1 = parts[1];
-                if (part1.contains(".")) {
-                    part1 = part1.substring(0, part1.lastIndexOf('.'));
-                }
+            List<String> parts = StrUtil.split(name, "-", true, true);
+            if (parts.size() >= 2) {
+                String artist = parts.get(0).trim();
+                String part1 = parts.get(1);
                 String title = part1.trim();
                 musicName.setName(title);
                 musicName.setArtist(artist);

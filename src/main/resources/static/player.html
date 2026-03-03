@@ -36,7 +36,7 @@
         }
 
         .player-container {
-            background-color: white;
+            background-color: rgba(255, 255, 255, .8);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -841,16 +841,14 @@
                     return;
                 }
 
-                // 模拟API调用 - 实际使用时替换为真实API
                 loadMusicLyric(song.id, (data) => {
                     // 解析歌词
-                    this.lyricParser = new LyricParser(data);
-
+                    let lyricParser = new LyricParser(data);
                     // 缓存歌词
-                    this.lyricCache.set(song.id || song.title, this.lyricParser);
-
+                    this.lyricCache.set(song.id || song.title, lyricParser);
+                    this.lyricParser = lyricParser;
                     // 更新歌词显示
-                    this.updateLyricsDisplay(this.lyricParser);
+                    this.updateLyricsDisplay(lyricParser);
                 });
             } catch(error) {
                 console.error('获取歌词失败:', error);
