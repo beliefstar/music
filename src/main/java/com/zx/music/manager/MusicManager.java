@@ -41,6 +41,7 @@ public class MusicManager {
             list.add(musicItem);
         }
         list.sort(((o1, o2) -> o2.getAddTime().compareTo(o1.getAddTime())));
+        musicItems.clear();
         musicItems.addAll(list);
     }
 
@@ -86,6 +87,15 @@ public class MusicManager {
     public boolean exists(String id) {
         for (MusicItem musicItem : musicItems) {
             if (musicItem.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean exists(String name, String artist) {
+        for (MusicItem musicItem : musicItems) {
+            if (musicItem.getName().equals(name) || musicItem.getArtist().equals(artist)) {
                 return true;
             }
         }

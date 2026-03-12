@@ -57,6 +57,18 @@ public class MusicName {
         return musicName;
     }
 
+
+    public static MusicName of(String name, String artist, String ext) {
+        String musicId = Base64.encodeUrlSafe(artist + "-" + name) + "." + ext;
+
+        MusicName musicName = new MusicName();
+        musicName.setMusicId(musicId);
+        musicName.setName(name);
+        musicName.setArtist(artist);
+        musicName.setExt(ext);
+        return musicName;
+    }
+
     private static void parseArtist(MusicName musicName) {
         musicName.setArtist("");
         String name = musicName.getName();

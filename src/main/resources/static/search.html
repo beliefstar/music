@@ -63,7 +63,6 @@
 </div>
 
 <script src="/lib/jquery-3.7.1.min.js"></script>
-<!--<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/4.5.3/js/bootstrap.min.js"></script>-->
 <script src="/lib/bootstrap.bundle.min.js"></script>
 <script src="/cus/session.js"></script>
 <script>
@@ -98,14 +97,12 @@
     function chooseItem(target) {
         openLoading()
         let el = $(target)
-        let ref = el.attr("data-ref")
         let id = el.attr("data-id")
 
         $.ajax({
-            url: "api/music/getPlayUrl",
+            url: "api/v3/music/touch",
             data: {
-                "thread": ref,
-                "name": id
+                "id": id
             },
             success(data) {
                 window.location = "player.html?id=" + data
@@ -116,7 +113,7 @@
     if (keyword !== '') {
         openLoading()
         $.ajax({
-            url: "api/music/search",
+            url: "api/v3/music/search",
             data: {
                 keyword
             },
@@ -124,15 +121,11 @@
                 let as = []
                 for (let i = 0; i < data.length; i++) {
                     let it = data[i]
-                    let ref = $(it).attr('href')
-                    let text = $(it).text()
 
                     let aEl = $('<div>')
-                    aEl.attr("data-ref", ref)
-                    aEl.attr("data-id", parseStoreId(text))
-                    // aEl.attr("href", "player.html?ref=" + ref + "&name=" + encodeURIComponent(parseStoreId(text)))
+                    aEl.attr("data-id", it.id)
                     aEl.addClass("list-group-item").addClass("list-group-item-action")
-                    aEl.text(text)
+                    aEl.text(`${it.artist}-${it.name}.${it.ext}`)
                     aEl.click(e => {
                         chooseItem(e.target)
                     })
