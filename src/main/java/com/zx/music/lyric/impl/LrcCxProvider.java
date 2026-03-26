@@ -7,6 +7,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.zx.music.lyric.LrcValidator;
 import com.zx.music.lyric.LyricProvider;
+import com.zx.music.manager.bean.MusicName;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
@@ -44,8 +45,11 @@ public class LrcCxProvider implements LyricProvider {
     }
 
     public static void main(String[] args) {
+        String s = "6Zi_5qKo57Kk44CK5ZC05ZOl56qf44CL.mp3";
+        MusicName mn = MusicName.of(s);
+
         LrcCxProvider provider = new LrcCxProvider();
-        String lyric = provider.getLyric("夜的第七章", "周杰伦&潘儿");
+        String lyric = provider.getLyric(mn.getName(), mn.getArtist());
         System.out.println(lyric);
     }
 }
