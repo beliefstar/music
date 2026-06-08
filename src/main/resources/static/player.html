@@ -15,34 +15,43 @@
             --light-color: #f8f9fa;
             --dark-color: #212529;
             --lyric-active-color: #0d6efd;
-            --lyric-color: #666;
+            --lyric-color: #eee;
         }
 
         body {
             min-height: 100vh;
         }
 
+        .nav-bg {
+            background-color: rgba(0,0,0,0) !important;
+        }
+
         .background {
-            width: calc(100% + 20px); /* 补偿margin扩大 */
-            height: calc(100% + 20px);
-            margin: -10px;
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 100vh;
+            transform: translate(-50%, -50%);
             z-index: -1;
-            background-image: url("./img/bg.jpg");
-            background-size: cover;
+
+            background-image: url(./img/bg.jpg);
+            background-size: cover;       /* 图片铺满整个容器 */
+            background-position: center;  /* 图片中心对齐容器中心 */
+            background-repeat: no-repeat;
+
             filter: blur(5px);
         }
 
         .player-container {
-            background-color: rgba(255, 255, 255, .8);
+            background-color: rgba(20, 20, 20, 0.6);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 100%;
             margin: 20px auto;
             padding-top: 15px;
+            color: var(--light-color);
         }
 
         .player-content {
@@ -82,12 +91,11 @@
 
         .album-art {
             position: absolute;
-            top: 50px;
-            left: 50px;
-            width: 200px;
-            height: 200px;
-            object-fit: contain;
-            transform-origin: 100px 100px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .song-info {
@@ -100,7 +108,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 5px;
-            color: var(--dark-color);
+            color: var(--light-color);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -320,6 +328,7 @@
             opacity: 0.6;
             transition: all 0.3s ease;
             cursor: default;
+            color: var(--lyric-color);
         }
 
         .lyric-line.active {
@@ -419,7 +428,7 @@
                 padding-right: 0;
             }
             .player-container {
-                background-color: white;
+                background-color: rgba(255, 255, 255, 0.6);
                 border-radius: 0;
                 box-shadow: 0 0 0;
                 overflow: hidden;
@@ -462,13 +471,13 @@
 
         /* 动画效果 */
         @keyframes rotateAlbumArt {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.5); }
-            100% { transform: rotate(360deg) scale(1); }
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .rotate {
-            animation: rotateAlbumArt 20s linear infinite;
+            animation: rotateAlbumArt 30s linear infinite;
         }
 
         .paused {
@@ -496,12 +505,12 @@
     </style>
 </head>
 <body>
-<div class="background"></div>
+<div class="background" id="background"></div>
 
 <div class="container">
     <div class="row">
         <div class="col-12" style="padding: 0">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <nav class="navbar navbar-expand-lg nav-bg">
                 <a class="navbar-brand" href="/index.html">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-music-note-list" viewBox="0 0 16 16">
                         <path d="M12 13c0 1.105-1.12 2-2.5 2S7 14.105 7 13s1.12-2 2.5-2 2.5.895 2.5 2z"/>
@@ -1191,7 +1200,8 @@
                 // console.log('时间更新:', currentTime, '/', duration);
             },
             onSongChange: (song, index) => {
-                console.log('歌曲改变:', song.title, '索引:', index);
+                var bgImage = song.album || './img/bg.jpg';
+                document.getElementById("background").style.backgroundImage = `url(${bgImage})`;
             },
             onEnded: (song, index) => {
                 console.log('歌曲结束:', song.title, '索引:', index);
